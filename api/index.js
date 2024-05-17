@@ -1,4 +1,16 @@
 import express from "express";
+import mongoose from "mongoose";
+
+mongoose
+  .connect(
+    "mongodb+srv://chinarayudu:password3456@mern-blog.empuson.mongodb.net/mern-blog?retryWrites=true&w=majority&appName=mern-blog"
+  )
+  .then(() => {
+    console.log("MongoDb is Connected");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 const app = express();
 
