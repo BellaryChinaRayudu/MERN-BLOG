@@ -1,7 +1,50 @@
-import { Label, TextInput, Button } from "flowbite-react";
-import { Link } from "react-router-dom";
+import { Label, TextInput, Button, Alert, Spinner } from "flowbite-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function SignUp() {
+  const [formdata, setFormData] = useState({});
+  const [errorMessage, seterrorMessage] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const handleChange = (e) => {
+    setFormData({
+      ...formdata,
+      [e.target.id]: e.target.value.trim(),
+    });
+  };
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formdata.username || !formdata.password || !formdata.email) {
+      return seterrorMessage("Pleasse Fill all the fields");
+    }
+    try {
+      setLoading(true);
+      seterrorMessage(null);
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formdata),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        return seterrorMessage(data.message);
+      }
+      setLoading(false);
+      if (res.ok) {
+        navigate("/signin");
+      }
+    } catch (e) {
+      console.log(e.message);
+      seterrorMessage(e.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen mt-20">
       <div className="flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5">
@@ -18,29 +61,56 @@ export default function SignUp() {
           </p>
         </div>
         <div className="flex-1">
-          <form className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="">
               <Label value="Your username" />
-              <TextInput type="text" placeholder="username" id="username" />
+              <TextInput
+                type="text"
+                placeholder="username"
+                id="username"
+                onChange={handleChange}
+              />
             </div>
             <div className="">
               <Label value="Your Email" />
-              <TextInput type="text" placeholder="name@company.in" id="email" />
+              <TextInput
+                type="email"
+                placeholder="name@company.in"
+                id="email"
+                onChange={handleChange}
+              />
             </div>
             <div className="">
               <Label value="Your password" />
-              <TextInput type="text" placeholder="username" id="username" />
+              <TextInput
+                type="password"
+                placeholder="password"
+                id="password"
+                onChange={handleChange}
+              />
             </div>
-            <Button gradientDuoTone="purpleToPink" type="submit">
-              Sign Up
+            <Button
+              gradientDuoTone="purpleToPink"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Spinner size="em" />
+                  <span className="pl-3">Loading</span>
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </form>
           <div className="flex gap-2 text-sm mt-5">
-            <spn>have an account?</spn>
+            <span>have an account?</span>
             <Link to="/signin" className="text-blue-500">
               sign In
             </Link>
           </div>
+          {errorMessage && <Alert className="mt-5">{errorMessage}</Alert>}
         </div>
       </div>
     </div>
