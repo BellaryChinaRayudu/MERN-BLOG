@@ -1,12 +1,12 @@
 import express from "express";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 import userRoutes from "./routes/User.route.js";
 import authRoutes from "./routes/auth.route.js";
+dotenv.config();
 
 mongoose
-  .connect(
-    "mongodb+srv://chinarayudu:password3456@mern-blog.empuson.mongodb.net/mern-blog?retryWrites=true&w=majority&appName=mern-blog"
-  )
+  .connect(process.env.MONGODB)
   .then(() => {
     console.log("MongoDb is Connected");
   })
