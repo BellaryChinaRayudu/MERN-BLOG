@@ -20,8 +20,8 @@ export default function Dashboard() {
         <div className="md:w-56">
           <Dashsidebar />
         </div>
+        {tab === "profile" && <Dashprofile />}
       </div>
-      {tab === "profile" && <Dashprofile />}
     </>
   );
 }
