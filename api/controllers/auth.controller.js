@@ -78,7 +78,7 @@ export const google = async (req, res, next) => {
     if (user) {
       const { password, ...rest } = user._doc;
       const token = jwt.sign(
-        { id: user._id, isAdmin: validUser.isAdmin },
+        { id: user._id, isAdmin: user.isAdmin },
         process.env.JWT
       );
       res
@@ -101,7 +101,10 @@ export const google = async (req, res, next) => {
         profilePicture: googlePhotoUrl,
       });
       await newUser.save();
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT);
+      const token = jwt.sign(
+        { id: newUser._id, isAdmin: newUser.isAdmin },
+        process.env.JWT
+      );
       const { password, ...rest } = newUser._doc;
       res
         .status(200)
