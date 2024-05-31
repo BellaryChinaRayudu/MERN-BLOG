@@ -54,6 +54,7 @@ export const signin = async (req, res, next) => {
     const token = jwt.sign(
       {
         id: validUser._id,
+        isAdmin: validUser.isAdmin,
       },
       process.env.JWT
     );
@@ -76,7 +77,10 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (user) {
       const { password, ...rest } = user._doc;
-      const token = jwt.sign({ id: user._id }, process.env.JWT);
+      const token = jwt.sign(
+        { id: user._id, isAdmin: validUser.isAdmin },
+        process.env.JWT
+      );
       res
         .status(200)
         .cookie("access_token", token, {
