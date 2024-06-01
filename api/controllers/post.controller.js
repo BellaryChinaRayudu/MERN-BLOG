@@ -1,4 +1,5 @@
 import post from "../models/Post.module.js";
+import User from "../models/User.module.js";
 import { errorHandler } from "../utils/error.js";
 
 export const create = async (req, res, next) => {
@@ -102,6 +103,43 @@ export const updatePost = async (req, res, next) => {
       { new: true }
     );
     res.status(200).json(updatePost);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUsers = async (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return next(errorHandler(403, "You are not allowed to see all users"));
+  }
+  try {
+    const startIndex = parseInt(req.query.startIndex || 0);
+    const limit = parseInt(req.query.limit) || 0;
+    const sortDiection = req.query.sort === "asc" ? 1 : -1;
+
+    const users = await User.find()
+      .sort({ createdAt: sortDiection })
+      .skip(startIndex)
+      .limit(limit);
+    const usersWithOutPassword = users.map((user) => {
+      const { password, ...rest } = user._doc;
+      return rest;
+    });
+    const totalUsers = await User.countDocuments();
+    const now = new Date();
+    const oeMonthAgo = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      now.getDate()
+    );
+    const lastMonthUsers = await User.countDocuments({
+      createdAt: { $gte: oeMonthAgo },
+    });
+    res.status(200).json({
+      users: usersWithOutPassword,
+      totalUsers,
+      lastMonthUsers,
+    });
   } catch (err) {
     next(err);
   }
