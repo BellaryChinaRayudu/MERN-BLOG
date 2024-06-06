@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TextInput, Textarea, Button, Alert } from "flowbite-react";
 import Comment from "./Comment";
 
@@ -9,6 +9,7 @@ export default function CommentSection({ postId }) {
   const [comment, setComment] = useState("");
   const [commentError, setCommmentError] = useState(null);
   const [comments, setComments] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getComments = async () => {
@@ -46,12 +47,41 @@ export default function CommentSection({ postId }) {
       if (res.ok) {
         setComment("");
         setCommmentError(null);
-        settComments({ data, ...comments });
+        setComments({ data, ...comments });
       }
     } catch (err) {
       setCommmentError(err.message);
     }
   };
+
+  const handleLike = async (commentId) => {
+    try {
+      if (!currentUser) {
+        navigate();
+        return;
+      }
+      const res = await fetch(`/api/comment/likeComment/${commentId}`, {
+        method: "PUT",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(
+          comments.map((comment) => {
+            comment._id === commentId
+              ? {
+                  ...comment,
+                  likes: data.likes,
+                  numberOfLikes: data.likes.length,
+                }
+              : comment;
+          })
+        );
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {currentUser ? (
@@ -116,7 +146,7 @@ export default function CommentSection({ postId }) {
             </div>
           </div>
           {comments.map((comment) => {
-            <Comment item={comment} key={comment._id} />;
+            <Comment comment={comment} key={comment._id} onLike={handleLike} />;
           })}
         </>
       )}
