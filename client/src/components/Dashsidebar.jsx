@@ -5,6 +5,8 @@ import {
   HiArrowSmRight,
   HiDocumentText,
   HiOutlineUserGroup,
+  HiChartPie,
+  HiAnnotation,
 } from "react-icons/hi";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -43,6 +45,13 @@ export default function Dashsidebar() {
     <Sidebar>
       <Sidebar.Items>
         <Sidebar.ItemGroup className="flex flex-col gap-4">
+          {currentUser.isAdmin && (
+            <Link to="/dashboard?tab=dash">
+              <Sidebar.Item active={tab === "dash"} icon={HiChartPie} as="div">
+                Dashboard
+              </Sidebar.Item>
+            </Link>
+          )}
           <Link to="/dashboard?tab=profile">
             <Sidebar.Item
               active={tab === "profile"}
@@ -80,7 +89,7 @@ export default function Dashsidebar() {
             <Link to="/dashboard?tab=comments">
               <Sidebar.Item
                 active={tab === "users"}
-                icon={HiOutlineUserGroup}
+                icon={HiAnnotation}
                 as="div"
               >
                 Comments
