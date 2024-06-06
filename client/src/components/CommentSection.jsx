@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { TextInput, Textarea, Button, Alert } from "flowbite-react";
+import { Modal, TextInput, Textarea, Button, Alert } from "flowbite-react";
 import Comment from "./Comment";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
@@ -19,7 +20,7 @@ export default function CommentSection({ postId }) {
         const res = await fetch(`/api/comment/getPostComments/${postId}`);
         if (res.ok) {
           const data = await res.json();
-          setComments(data.comments);
+          setComments(data);
         }
       } catch (err) {
         console.log(err);
@@ -34,10 +35,10 @@ export default function CommentSection({ postId }) {
       return;
     }
     try {
-      const res = await fetch("/appi/comment/create", {
+      const res = await fetch("/api/comment/create", {
         method: "POST",
         headers: {
-          "Content-Type": "applicatiion/json",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           content: comment,
@@ -49,7 +50,7 @@ export default function CommentSection({ postId }) {
       if (res.ok) {
         setComment("");
         setCommmentError(null);
-        setComments({ data, ...comments });
+        setComments([data, ...comments]);
       }
     } catch (err) {
       setCommmentError(err.message);
@@ -59,7 +60,7 @@ export default function CommentSection({ postId }) {
   const handleLike = async (commentId) => {
     try {
       if (!currentUser) {
-        navigate();
+        navigate("/sign-in");
         return;
       }
       const res = await fetch(`/api/comment/likeComment/${commentId}`, {
@@ -68,15 +69,15 @@ export default function CommentSection({ postId }) {
       if (res.ok) {
         const data = await res.json();
         setComments(
-          comments.map((comment) => {
+          comments.map((comment) =>
             comment._id === commentId
               ? {
                   ...comment,
                   likes: data.likes,
                   numberOfLikes: data.likes.length,
                 }
-              : comment;
-          })
+              : comment
+          )
         );
       }
     } catch (err) {
@@ -85,7 +86,7 @@ export default function CommentSection({ postId }) {
   };
 
   const handleEdit = async (comment, editedComment) => {
-    setComment(
+    setComments(
       comments.map((c) =>
         c._id === comment._id ? { ...c, content: editedComment } : c
       )
@@ -97,13 +98,14 @@ export default function CommentSection({ postId }) {
     try {
       if (!currentUser) {
         navigate("/sign-in");
+        return;
       }
       const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
         method: "DELETE",
       });
       if (res.ok) {
         const data = await res.json();
-        setComments(comments.filter((content) => comment._id !== commentId));
+        setComments(comments.filter((comment) => comment._id !== commentId));
       }
     } catch (err) {
       console.log(err.message);
@@ -144,6 +146,7 @@ export default function CommentSection({ postId }) {
             <Textarea
               placeholder="Add a comment..."
               rows="3"
+              value={comment}
               maxLength="200"
               onChange={(e) => setComment(e.target.value)}
             />
@@ -170,10 +173,10 @@ export default function CommentSection({ postId }) {
           <div className="text-sm my-5 flex items-center gap-1">
             <p>Comments</p>
             <div className="border border-gray-400 py-1 px-2 rounded-sm">
-              <p>{comment.length}</p>
+              <p>{comments.length}</p>
             </div>
           </div>
-          {comments.map((comment) => {
+          {comments.map((comment) => (
             <Comment
               comment={comment}
               key={comment._id}
@@ -183,8 +186,8 @@ export default function CommentSection({ postId }) {
                 setShowModal(true);
                 setCommentToDelete(commentId);
               }}
-            />;
-          })}
+            />
+          ))}
         </>
       )}
       <Modal

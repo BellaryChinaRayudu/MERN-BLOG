@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { FaThumbsUp } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -15,16 +15,14 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
       try {
         const res = await fetch(`/api/user/${comment.userId}`);
         const data = await res.json();
-
-        if (res.ok) {
-          setUser(data);
-        }
+        console.log(data);
+        setUser(data);
       } catch (err) {
         console.log(err);
       }
     };
     getUser();
-  });
+  }, [comment]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -63,7 +61,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
             {user ? `@${user.username}` : "Anonymous User"}
           </span>
           <span className="text-gray-500 text-xs">
-            {moment(comment.createdAt).fomNow()}
+            {moment(comment.createdAt).fromNow()}
           </span>
         </div>
         {isEditing ? (
@@ -75,8 +73,12 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
               onChange={(e) => setEditedContent(e.target.value)}
             />
             <div className="flex justify-end gap-2 text-xs">
-              <Button type="button" size="sm" gradientDuoTone="purpleToBlue">
+              <Button
+                type="button"
+                size="sm"
+                gradientDuoTone="purpleToBlue"
                 onClick={handleSave}
+              >
                 Save
               </Button>
               <Button
@@ -100,16 +102,16 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                 className={`text-gray-400 hover:text-blue-500 ${
                   currentUser &&
                   comment.likes.includes(currentUser._id) &&
-                  "text-blue"
+                  "!text-blue-500"
                 }`}
               >
                 <FaThumbsUp className="text-sm" />
               </button>
               <p className="text-gray-400">
                 {comment.numberOfLikes > 0 &&
-                comment.numberOfLikes + " " + comment.numberOfLikes === 1
-                  ? "like"
-                  : "likes"}
+                  comment.numberOfLikes +
+                    " " +
+                    (comment.numberOfLikes === 1 ? "like" : "likes")}
               </p>
               {currentUser &&
                 (currentUser._id === comment.userId || currentUser.isAdmin) && (

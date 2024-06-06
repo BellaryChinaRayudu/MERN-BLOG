@@ -4,7 +4,7 @@ import { errorHandler } from "../utils/error.js";
 const createComment = async (req, res, next) => {
   try {
     const { content, postId, userId } = req.body;
-    if (userId != req.user.id) {
+    if (userId !== req.user.id) {
       return next(
         errorHandler(403, "You are not allowed to create this comment")
       );
@@ -15,8 +15,8 @@ const createComment = async (req, res, next) => {
       postId,
       userId,
     });
-
     await newComment.save();
+    res.status(200).json(newComment);
   } catch (err) {
     next(err);
   }
@@ -37,7 +37,7 @@ const likeComment = async (req, res, next) => {
   try {
     const comment = await Comment.findById(req.params.commentId);
 
-    if (!commment) {
+    if (!comment) {
       return next(errorHandler(404, "Comment Not Found"));
     }
     const userIndex = comment.likes.indexOf(req.user.id);
@@ -55,7 +55,7 @@ const likeComment = async (req, res, next) => {
   }
 };
 
-export const editComment = async (req, res, next) => {
+const editComment = async (req, res, next) => {
   try {
     const comment = await Comment.findById(req.params.commentId);
     if (!comment) {

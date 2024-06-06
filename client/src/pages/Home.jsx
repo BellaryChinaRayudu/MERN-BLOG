@@ -12,15 +12,8 @@ export default function Home() {
     });
   });
   return (
-    <div className="main23">
-      <div className="container">
-        <div className="circle"></div>
-        <div ref={gsapRef} className="box"></div>
-      </div>
-      <div className="kuch">
-        <div className="circle"></div>
-        <div className="box"></div>
-      </div>
+    <div className="">
+      <h1>Home</h1>
     </div>
   );
 }
